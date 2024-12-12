@@ -1,119 +1,109 @@
-#include <stdio.h>
-#include <stdlib.h>
-
-// Define the structure for each node of the polynomial linked list
-struct Node {
-    int coeff;  // Coefficient
-    int exp;    // Exponent
-    struct Node* next;
+#include<stdio.h>
+#include<stdlib.h>
+struct node {
+float coeff;
+int expo;
+struct node* link;
 };
+struct node* insert (struct node* head, float co, int ex)
+{
+    struct node* temp;
+    struct node* newP = malloc (sizeof (struct node)) ;
+    newP->coeff = co; newP->expo = ex;
+    newP->link = NULL;
+//Last OR gaven emonent is greater chan the first node exponent
+    if (head == NULL||ex>head->expo)
+      {
+        newP->link = head;
+        head = newP;
+      }
+    else
+       {
+        temp = head;
+           while (temp->link!=NULL && temp->link->expo >= ex)
+               temp = temp->link;
+        newP->link = temp->link;
+        temp->link = newP;
+       }
+return head;
+}
+struct node* create (struct node* head)
+ {
+    int n, i;
+    float coeff;
+    int expo;
+    printf ("Ent the number of terms: "); 
+    scanf ("%d", &n) ;
+    for (i=0; i<n; i++)
+    {
+        printf ("Enter the coefficient for term %d: ", i+1);
+        scanf ("%f", &coeff) ;
+        printf ("Enter the exponent for term %d: ", i+1);
+        scanf ("%d", &expo) ;
+        head = insert (head, coeff, expo) ;
+    }
+    return head;
+ }
 
-// Function to create a new node in the linked list
-struct Node* createNode(int coeff, int exp) {
-    struct Node* newNode = (struct Node*)malloc(sizeof(struct Node));
-    newNode->coeff = coeff;
-    newNode->exp = exp;
-    newNode->next = NULL;
-    return newNode;
+void print (struct node* head)
+{
+  if (head == NULL)
+    printf ("No Polynomial.");
+  else{
+    struct node* temp = head;
+    while (temp != NULL)
+     {
+        printf(" (%.1fx^%d)", temp->coeff, temp->expo) ;
+        temp = temp->link;
+        if (temp!=NULL)
+            printf (" + ");
+        else
+            printf ("\n") ;
+     }
+  }
 }
 
-// Function to insert a node at the end of the linked list
-void insertEnd(struct Node** head, int coeff, int exp) {
-    struct Node* newNode = createNode(coeff, exp);
-    if (*head == NULL) {
-        *head = newNode;
-    } else {
-        struct Node* temp = *head;
-        while (temp->next != NULL) {
-            temp = temp->next;
+void polyAdd(struct node* head1, struct node* head2) {
+    struct node* ptr1 = head1;
+    struct node* ptr2 = head2;
+    struct node* head3 = NULL;
+
+    while (ptr1 != NULL && ptr2 != NULL) {
+        if (ptr1->expo == ptr2->expo) {
+            head3 = insert(head3, ptr1->coeff + ptr2->coeff, ptr1->expo);
+            ptr1 = ptr1->link;
+            ptr2 = ptr2->link;
+        } else if (ptr1->expo > ptr2->expo) {
+            head3 = insert(head3, ptr1->coeff, ptr1->expo);
+            ptr1 = ptr1->link;
+        } else { // ptr1->expo < ptr2->expo
+            head3 = insert(head3, ptr2->coeff, ptr2->expo);
+            ptr2 = ptr2->link;
         }
-        temp->next = newNode;
     }
+
+    // Add remaining terms from both polynomials (if any)
+    while (ptr1 != NULL) {
+        head3 = insert(head3, ptr1->coeff, ptr1->expo);
+        ptr1 = ptr1->link;
+    }
+    while (ptr2 != NULL) {
+        head3 = insert(head3, ptr2->coeff, ptr2->expo);
+        ptr2 = ptr2->link;
+    }
+
+    printf("Added polynomial is: ");
+    print(head3);
 }
 
-// Function to print the polynomial
-void printPolynomial(struct Node* head) {
-    if (head == NULL) {
-        printf("0\n");
-        return;
-    }
-    struct Node* temp = head;
-    while (temp != NULL) {
-        printf("%d*x^%d", temp->coeff, temp->exp);
-        if (temp->next != NULL) {
-            printf(" + ");
-        }
-        temp = temp->next;
-    }
-    printf("\n");
-}
-
-// Function to add two polynomials
-struct Node* addPolynomials(struct Node* poly1, struct Node* poly2) {
-    struct Node* result = NULL;
-    struct Node* temp1 = poly1;
-    struct Node* temp2 = poly2;
-
-    while (temp1 != NULL && temp2 != NULL) {
-        if (temp1->exp > temp2->exp) {
-            insertEnd(&result, temp1->coeff, temp1->exp);
-            temp1 = temp1->next;
-        } else if (temp1->exp < temp2->exp) {
-            insertEnd(&result, temp2->coeff, temp2->exp);
-            temp2 = temp2->next;
-        } else {
-            int sumCoeff = temp1->coeff + temp2->coeff;
-            if (sumCoeff != 0) {
-                insertEnd(&result, sumCoeff, temp1->exp);
-            }
-            temp1 = temp1->next;
-            temp2 = temp2->next;
-        }
-    }
-
-    // Add remaining terms of poly1
-    while (temp1 != NULL) {
-        insertEnd(&result, temp1->coeff, temp1->exp);
-        temp1 = temp1->next;
-    }
-
-    // Add remaining terms of poly2
-    while (temp2 != NULL) {
-        insertEnd(&result, temp2->coeff, temp2->exp);
-        temp2 = temp2->next;
-    }
-
-    return result;
-}
-
-// Main function to demonstrate polynomial addition
-int main() {
-    struct Node* poly1 = NULL;
-    struct Node* poly2 = NULL;
-
-    // Creating the first polynomial: 5x^3 + 4x^2 + 2x^1
-    insertEnd(&poly1, 9, 5);
-    insertEnd(&poly1, 6, 3);
-    insertEnd(&poly1, 3, 1);
-
-    // Creating the second polynomial: 3x^3 + 1x^1 + 2x^0
-    insertEnd(&poly2, 3, 3);
-    insertEnd(&poly2, 6, 1);
-    insertEnd(&poly2, 9, 0);
-
-    // Print the input polynomials
-    printf("First Polynomial: ");
-    printPolynomial(poly1);
-
-    printf("Second Polynomial: ");
-    printPolynomial(poly2);
-
-    // Add the two polynomials
-    struct Node* result = addPolynomials(poly1, poly2);
-
-    // Print the result
-    printf("Sum of Polynomials: ");
-    printPolynomial(result);
-
-    return 0;
+int main ()
+{
+struct node* headl = NULL;
+struct node* head2 = NULL;
+printf ("Enter the first polynomial\n ");
+headl = create (headl) ;
+printf ("Enter the second polynomial\n ");
+head2 = create (head2) ;
+polyAdd (headl,head2);
+return 0;
 }
