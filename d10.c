@@ -1,107 +1,104 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-struct node
-{
+struct node {
     int data;
     struct node *next;
 };
-void Display(struct node *head)
-{
-    struct node *temp;
-    temp=head;
-    while(temp!=NULL)
-    {
-        printf("%d\t",temp->data);
-        temp=temp->next;
+
+// Function to display the linked list
+void Display(struct node *head) {
+    struct node *temp = head;
+    if (head == NULL) {
+        printf("The list is empty.\n");
+        return;
     }
+    while (temp != NULL) {
+        printf("%d\t", temp->data);
+        temp = temp->next;
+    }
+    printf("\n");
 }
-struct node* Add(struct node *head,int value)
-{
-    struct node *newnode,*prev,*curr;
-    newnode=(struct node*)malloc(sizeof(struct node));
-    newnode->data=value;
-    newnode->next=NULL;
-    if(newnode==NULL)
-    {
-        printf("Error could not allocate memory:");
+
+// Function to add a value in a sorted manner
+struct node* Add(struct node *head, int value) {
+    struct node *newnode = (struct node*)malloc(sizeof(struct node));
+    if (newnode == NULL) {
+        printf("Error: Could not allocate memory.\n");
+        return head;
     }
-    else{
-        if(head==NULL)
-            head=newnode;
-        else{
-            if(newnode->data<head->data)
-               {
-                 newnode->next=head;
-                    head=newnode;
-               }
-            else{
-                curr=head->next;
-                prev=head;
-                while(curr!=NULL&&newnode->data>curr->data)
-                {
-                    prev=prev->next;
-                    curr=curr->next;
-                }
-                prev->next=newnode;
-                newnode->next=curr;
-            }
+    newnode->data = value;
+    newnode->next = NULL;
+
+    if (head == NULL || newnode->data < head->data) {
+        newnode->next = head;
+        head = newnode;
+    } else {
+        struct node *curr = head, *prev = NULL;
+        while (curr != NULL && newnode->data > curr->data) {
+            prev = curr;
+            curr = curr->next;
         }
+        newnode->next = curr;
+        if (prev != NULL) prev->next = newnode;
     }
     return head;
-};
-int searchElement(struct node *head,int item)
-{
-    struct node *curr=head;//initialize current
-    int index=0;
-    //traverse till the end of the linked list
-    while(curr!=NULL)
-    {
-        if(curr->data==item)
-        {
-            return index;
-        }
-    curr=curr->next;
-    index++;
-    }
-    return -1;
 }
-void main()
-{
-    int choice,value,item,index;
-    struct node *head=NULL;
-    for(;;)
-    {
-        printf("\nEnter 1.Add 2.Display 3.Search 4.exit\n");
-        printf("\nEnter choice:");
-        scanf("%d",&choice);
-        switch(choice)
-        {
+
+// Function to search for an element
+int searchElement(struct node *head, int item) {
+    struct node *curr = head; // Initialize current pointer
+    int index = 0;
+
+    // Traverse the linked list
+    while (curr != NULL) {
+        if (curr->data == item) {
+            return index; // Return index if item is found
+        }
+        curr = curr->next;
+        index++;
+    }
+    return -1; // Return -1 if item not found
+}
+
+int main() {
+    int choice, value, item, index;
+    struct node *head = NULL;
+
+    while (1) {
+        printf("\nMenu:\n");
+        printf("1. Add\n");
+        printf("2. Display\n");
+        printf("3. Search\n");
+        printf("4. Exit\n");
+        printf("Enter choice: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
         case 1:
-            printf("Enter value:");
-            scanf("%d",&value);
-            head=Add(head,value);
+            printf("Enter value to add: ");
+            scanf("%d", &value);
+            head = Add(head, value);
+            printf("Value added successfully.\n");
             break;
         case 2:
-            if(head==NULL)
-            {
-
-                printf("List is empty");
-            }
+            printf("Linked List: ");
             Display(head);
             break;
         case 3:
-            printf("enter the element of the search:");
-            scanf("%d",&item);
-            index=searchElement(head,item);
-            if(index==-1)
-                printf("item not found");
+            printf("Enter the element to search: ");
+            scanf("%d", &item);
+            index = searchElement(head, item);
+            if (index == -1)
+                printf("Item not found.\n");
             else
-                printf("Item found at position:%d",index+1);
-                break;
-        case 4:
-            exit(1);
+                printf("Item found at position: %d\n", index + 1);
             break;
-        }
-    }
+        case 4:
+            printf("Exiting the program.\n");
+            exit(0);
+        default:
+            printf("Invalid choice. Please try again.\n");
+        }
+    }
 }
